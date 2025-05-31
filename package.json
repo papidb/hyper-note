@@ -1,0 +1,27 @@
+{
+  "name": "hyper-note",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=23.7.0"
+  },
+  "engineStrict": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dht": "hyperdht --bootstrap --host 127.0.0.1 --port 30001"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@hyperswarm/rpc": "^3.3.2",
+    "commander": "^14.0.0",
+    "hyperbee": "^2.24.2",
+    "hypercore": "^10.37.8",
+    "hyperdht": "^6.20.5",
+    "hyperswarm": "^4.11.7",
+    "random-access-memory": "^6.2.1"
+  }
+}
