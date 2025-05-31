@@ -19,6 +19,7 @@
     "@hyperswarm/rpc": "^3.3.2",
     "b4a": "^1.6.7",
     "commander": "^14.0.0",
+    "debug": "^4.4.1",
     "hyperbee": "^2.24.2",
     "hypercore": "^10.37.8",
     "hyperdht": "^6.20.5",
