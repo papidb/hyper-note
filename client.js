@@ -5,11 +5,14 @@ import Hyperbee from "hyperbee";
 import Hypercore from "hypercore";
 import DHT from "hyperdht";
 import Hyperswarm from "hyperswarm";
+import RAM from "random-access-memory";
+import { payloadToBuffer } from "./utils.js";
 
 export const client = async () => {
   // const hcore = new Hypercore(RAM, Buffer.from(STORAGE_KEY, "hex"));
   const hCore = new Hypercore(
-    "./db/rpc-client-" + Date.now(),
+    // "./db/rpc-client-" + Date.now(),
+    () => new RAM(),
     Buffer.from(
       "6d29b15134d84b7882ad71a3519be21eaa004d5a55320d23caba5a075f877035",
       "hex"
@@ -29,26 +32,14 @@ export const client = async () => {
 
   await hCore.update();
   await hCore.replicate(true);
-  for await (const block of hCore.createReadStream()) {
-    if (block) {
-      console.log(block.toString("utf-8"));
-    }
-
-    // console.log(block.key.toString("hex"));
-    // console.log(block.value.toString("utf-8"));
-  }
-  // let dhtSeed = (await hbee.get("dht-seed"))?.value;
-  //   let dhtSeed = Buffer.from(
-  //     "1f77e4f7133587b1d2d23dd64c7b51f2b37bb5469553adb1bb9c4f47081e7f2d",
-  //     "hex"
-  //   );
-  // console.log({ dhtSeed: dhtSeed?.toString("hex") });
-  // const keyPair = DHT.keyPair(dhtSeed);
-  let dhtSeed = Buffer.from(
-    "cd2e3b7d87b0f060ae69763987c2b4a23f8d02d3f963e5f69117cd8c7df2659b",
-    "hex"
-  );
+  let dhtSeed = (await hBee.get("dht-seed"))?.value;
+  console.log({ dhtSeed: dhtSeed?.toString("hex") });
   const keyPair = DHT.keyPair(dhtSeed);
+  // let dhtSeed = Buffer.from(
+  //   "cd2e3b7d87b0f060ae69763987c2b4a23f8d02d3f963e5f69117cd8c7df2659b",
+  //   "hex"
+  // );
+  // const keyPair = DHT.keyPair(dhtSeed);
   console.log({
     discoveryKey: hCore.discoveryKey.toString("hex"),
     keyPairPublicKey: keyPair.publicKey.toString("hex"),
@@ -63,25 +54,7 @@ export const client = async () => {
 
   const rpc = new RPC({ dht, keyPair });
 
-  //   const rpcServer = await rpc.createServer();
-  //   await rpcServer.listen();
-  //   rpcServer.respond("pong", async (reqRaw) => {
-  //     // reqRaw is Buffer, we need to parse it
-  //     const req = JSON.parse(reqRaw.toString("utf-8"));
-
-  //     const resp = { nonce: req.nonce - 1 };
-
-  //     // we also need to return buffer response
-  //     const respRaw = Buffer.from(JSON.stringify(resp), "utf-8");
-  //     return respRaw;
-  //   });
-
-  //   console.log({publicKey: keyPair.publicKey})
   const client = rpc.connect(keyPair.publicKey);
   const value = await client.request("ping", payloadToBuffer({ nonce: 126 }));
   console.log(value.toString("utf-8"));
 };
-
-function payloadToBuffer(payload) {
-  return Buffer.from(JSON.stringify(payload), "utf-8");
-}

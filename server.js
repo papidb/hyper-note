@@ -5,6 +5,7 @@ import Hyperbee from "hyperbee";
 import Hypercore from "hypercore";
 import DHT from "hyperdht";
 import Hyperswarm from "hyperswarm";
+import { payloadToBuffer } from "./utils.js";
 
 export async function server() {
   const hCore = new Hypercore("./db/rpc-server");
@@ -33,16 +34,7 @@ export async function server() {
   const rpc = new RPC({ dht, keyPair });
   const rpcServer = rpc.createServer();
   await rpcServer.listen();
-  rpcServer.respond("ping", async (reqRaw) => {
-    // reqRaw is Buffer, we need to parse it
-    const req = JSON.parse(reqRaw.toString("utf-8"));
 
-    const resp = { nonce: req.nonce + 1 };
-
-    // we also need to return buffer response
-    const respRaw = Buffer.from(JSON.stringify(resp), "utf-8");
-    return respRaw;
-  });
   //   store db in hyperbee
   await hBee.put("rpc-public-key", keyPair.publicKey.toString("hex"));
   console.log("dht seed: ", dhtSeed.toString("hex"));
@@ -53,11 +45,35 @@ export async function server() {
     rpcServer.publicKey.toString("hex")
   );
 
-  const hCoreSwarm = new Hyperswarm({ dht });
-  console.log({ discoveryKey: hCore.discoveryKey.toString("hex") });
+  const hCoreSwarm = new Hyperswarm();
   hCoreSwarm.join(hCore.discoveryKey);
   hCoreSwarm.on("connection", (conn) => {
     console.log("connection established");
     hCore.replicate(conn);
   });
+
+  mountRoutes(rpcServer);
+}
+
+function mountRoutes(server) {
+  const router = new Router(server);
+  router.handle("ping", (req) => {
+    return { nonce: req.nonce + 1 };
+  });
+  return router;
+}
+
+class Router {
+  constructor(server) {
+    this.server = server;
+    this.handle = this.handle.bind(this);
+  }
+
+  async handle(path, handler) {
+    return this.server.respond(path, async (reqRaw) => {
+      const req = JSON.parse(reqRaw.toString("utf-8"));
+      const res = await handler(req);
+      return payloadToBuffer(res);
+    });
+  }
 }
