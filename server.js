@@ -5,9 +5,10 @@ import Hyperbee from "hyperbee";
 import Hypercore from "hypercore";
 import DHT from "hyperdht";
 import Hyperswarm from "hyperswarm";
+import { serverLog } from "./logger.js";
 import { payloadToBuffer } from "./utils.js";
 
-export async function server() {
+export async function makeServerNode() {
   const hCore = new Hypercore("./db/rpc-server");
   const hBee = new Hyperbee(hCore, {
     keyEncoding: "utf-8",
@@ -37,10 +38,13 @@ export async function server() {
 
   //   store db in hyperbee
   await hBee.put("rpc-public-key", keyPair.publicKey.toString("hex"));
-  console.log("dht seed: ", dhtSeed.toString("hex"));
-  console.log("hyper bee public key: ", hCore);
-  console.log("dht public key: ", dht.defaultKeyPair.publicKey.toString("hex"));
-  console.log(
+  serverLog.info("dht seed: ", dhtSeed.toString("hex"));
+  serverLog.info("hyper bee public key: ", hCore);
+  serverLog.info(
+    "dht public key: ",
+    dht.defaultKeyPair.publicKey.toString("hex")
+  );
+  serverLog.info(
     "rpc server started listening on public key:",
     rpcServer.publicKey.toString("hex")
   );

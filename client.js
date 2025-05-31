@@ -8,10 +8,8 @@ import Hyperswarm from "hyperswarm";
 import RAM from "random-access-memory";
 import { payloadToBuffer } from "./utils.js";
 
-export const client = async () => {
-  // const hcore = new Hypercore(RAM, Buffer.from(STORAGE_KEY, "hex"));
+export async function makeClientNode() {
   const hCore = new Hypercore(
-    // "./db/rpc-client-" + Date.now(),
     () => new RAM(),
     Buffer.from(
       "6d29b15134d84b7882ad71a3519be21eaa004d5a55320d23caba5a075f877035",
@@ -35,15 +33,6 @@ export const client = async () => {
   let dhtSeed = (await hBee.get("dht-seed"))?.value;
   console.log({ dhtSeed: dhtSeed?.toString("hex") });
   const keyPair = DHT.keyPair(dhtSeed);
-  // let dhtSeed = Buffer.from(
-  //   "cd2e3b7d87b0f060ae69763987c2b4a23f8d02d3f963e5f69117cd8c7df2659b",
-  //   "hex"
-  // );
-  // const keyPair = DHT.keyPair(dhtSeed);
-  console.log({
-    discoveryKey: hCore.discoveryKey.toString("hex"),
-    keyPairPublicKey: keyPair.publicKey.toString("hex"),
-  });
 
   const dht = new DHT({
     port: 40001,
@@ -57,4 +46,4 @@ export const client = async () => {
   const client = rpc.connect(keyPair.publicKey);
   const value = await client.request("ping", payloadToBuffer({ nonce: 126 }));
   console.log(value.toString("utf-8"));
-};
+}

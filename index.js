@@ -2,8 +2,8 @@
 import { Command } from "commander";
 
 import packageJson from "./package.json" with { type: "json" };
-import { server } from "./server.js";
-import { client } from "./client.js";
+import { makeServerNode } from "./server.js";
+import { makeClientNode } from "./client.js";
 
 const program = new Command();
 
@@ -20,9 +20,9 @@ function cmd({mode}) {
        printAndExit("Invalid mode");
     }
     if (mode == "server") {
-        server()
+        makeServerNode()
     } else if (mode == "client") {
-        client()
+        makeClientNode()
     }
 }
 
