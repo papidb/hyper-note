@@ -23,8 +23,6 @@ async function cmd({ mode, name }) {
     }
     if (mode == "server") {
         return makeServerNode()
-        // } else if (mode == "client") {
-        // makeClientNode()
     }
     if (!name) {
         printAndExit("Name is required");
@@ -48,13 +46,12 @@ async function cmd({ mode, name }) {
                     console.log('⚠️ Usage: add <your note>');
                 } else {
                     const res = await client.request('add-note', { text, name });
-                    console.log(res)
-                    console.log('✅ Note saved.');
+                    console.log(`✅ Note saved: ${res.note.id}`);
                 }
                 break;
             case 'list':
                 console.log('📄 Notes:');
-                for await (const block of client.bee.createReadStream({})) {
+                for await (const block of client.bee.createReadStream({reverse: true})) {
                     if (block?.value) {
                         // console.log(block?.value?.toString("utf-8"))
                         const note = bufferToPayload(block.value);

@@ -9,7 +9,9 @@
   "engineStrict": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dht": "hyperdht --bootstrap --host 127.0.0.1 --port 30001"
+    "dht": "hyperdht --bootstrap --host 127.0.0.1 --port 30001",
+    "server": "DEBUG=\"*\" node index.js -m server",
+    "client": "DEBUG=\"*\" node index.js -m client"
   },
   "keywords": [],
   "author": "",
