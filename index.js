@@ -1,12 +1,12 @@
 // const { Command } = require('commander')
 import { Command } from "commander";
 
-import { makeClientNode } from "./client.js";
+// import { makeClientNode } from "./client.js";
 import { CLI } from "./lib/cli.js";
 import { Client } from "./lib/client.js";
+import { makeClientNode, makeServerNode } from "./lib/node.js";
+import { bufferToPayload, printAndExit } from "./lib/utils.js";
 import packageJson from "./package.json" with { type: "json" };
-import { makeServerNode } from "./server.js";
-import { bufferToPayload, printAndExit } from "./utils.js";
 
 const program = new Command();
 
