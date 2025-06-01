@@ -27,7 +27,7 @@ async function cmd({ mode, name }) {
     if (!name) {
         printAndExit("Name is required");
     }
-    const { hCore, hBee, rpcClient } = await makeClientNode();
+    const { hBee, rpcClient } = await makeClientNode();
     const cli = new CLI()
     const client = new Client(rpcClient, hBee, cli);
     const rl = cli.rl;
