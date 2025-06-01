@@ -6,13 +6,14 @@ import Hypercore from "hypercore";
 import DHT from "hyperdht";
 import Hyperswarm from "hyperswarm";
 import RAM from "random-access-memory";
-import { payloadToBuffer } from "./utils.js";
 
 export async function makeClientNode() {
   const hCore = new Hypercore(
+    // TODO: rename to use ram
+    // "./db/rpc-client-alpha",
     () => new RAM(),
     Buffer.from(
-      "6d29b15134d84b7882ad71a3519be21eaa004d5a55320d23caba5a075f877035",
+      "327e0f372495294e06e78d5546557990f8eb3d3bf12630f69aec43517745bdf9",
       "hex"
     )
   );
@@ -43,7 +44,11 @@ export async function makeClientNode() {
 
   const rpc = new RPC({ dht, keyPair });
 
-  const client = rpc.connect(keyPair.publicKey);
-  const value = await client.request("ping", payloadToBuffer({ nonce: 126 }));
-  console.log(value.toString("utf-8"));
+  const rpcClient = rpc.connect(keyPair.publicKey);
+
+  return {
+    hCore,
+    hBee,
+    rpcClient,
+  };
 }

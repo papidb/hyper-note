@@ -6,7 +6,7 @@ import Hypercore from "hypercore";
 import DHT from "hyperdht";
 import Hyperswarm from "hyperswarm";
 import { serverLog } from "./logger.js";
-import { payloadToBuffer } from "./utils.js";
+import { createHyperBeeSub, payloadToBuffer } from "./utils.js";
 
 export async function makeServerNode() {
   const hCore = new Hypercore("./db/rpc-server");
@@ -38,13 +38,13 @@ export async function makeServerNode() {
 
   //   store db in hyperbee
   await hBee.put("rpc-public-key", keyPair.publicKey.toString("hex"));
-  serverLog.info("dht seed: ", dhtSeed.toString("hex"));
-  serverLog.info("hyper bee public key: ", hCore);
-  serverLog.info(
+  console.info("dht seed: ", dhtSeed.toString("hex"));
+  console.info("hyper bee public key: ", hCore);
+  console.info(
     "dht public key: ",
     dht.defaultKeyPair.publicKey.toString("hex")
   );
-  serverLog.info(
+  console.info(
     "rpc server started listening on public key:",
     rpcServer.publicKey.toString("hex")
   );
@@ -56,13 +56,28 @@ export async function makeServerNode() {
     hCore.replicate(conn);
   });
 
-  mountRoutes(rpcServer);
+  mountRoutes(rpcServer, createHyperBeeSub(hBee));
+  return {
+    hCore,
+    hBee,
+  };
 }
 
-function mountRoutes(server) {
+function mountRoutes(server, hBee) {
+  serverLog.info("mounting routes");
   const router = new Router(server);
   router.handle("ping", (req) => {
     return { nonce: req.nonce + 1 };
+  });
+  router.handle("add-note", async (req) => {
+    const note = {
+      id: crypto.randomUUID(),
+      content: req.text,
+      timestamp: Date.now(),
+      name: req.name,
+    };
+    const entry = await hBee.put(note.id, JSON.stringify(note));
+    return { note, entry };
   });
   return router;
 }
@@ -77,6 +92,9 @@ class Router {
     return this.server.respond(path, async (reqRaw) => {
       const req = JSON.parse(reqRaw.toString("utf-8"));
       const res = await handler(req);
+      if (res === undefined) {
+        return payloadToBuffer({});
+      }
       return payloadToBuffer(res);
     });
   }
