@@ -1,7 +1,5 @@
-// const { Command } = require('commander')
 import { Command } from "commander";
 
-// import { makeClientNode } from "./client.js";
 import { CLI } from "./lib/cli.js";
 import { Client } from "./lib/client.js";
 import { makeClientNode, makeServerNode } from "./lib/node.js";
